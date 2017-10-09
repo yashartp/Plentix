@@ -25,6 +25,7 @@ contract dataEntities{
        bool active;
     }
 
+    mapping(address=>Admin) public admins;
 /**
  * A user is a generic type for both referrer and referee as a single person can be both
  */
@@ -35,15 +36,6 @@ contract dataEntities{
         referral[] gotReffered; // it will store the refferals which this user got reffered by
     }
 
-/**
- * A referral is an event of a user actually referring other user from front end
- */
-       
-    struct referral {
-        address referrer;
-        address refer;
-        uint8 noOfRedemptions; //We should be able to know how many redemptions have beeen made against this referral. Basis this number we will define the rewards given to the referrer and referee
-    }
 
 
 /**
@@ -52,13 +44,27 @@ contract dataEntities{
     
     struct scheme {
         address business; //This will store the id of the business running the scheme. In the later stages when write the full application we will add the registration mechanism for business
-        uint8 redemptionsAllowed;
-        uint8 totalReferralsAllowed;
+        uint8 redemptionsAllowed; //redemptions allowed per referral to referee
+        uint16 totalReferralsAllowed;
         string domain;
-        uint8[] referrerReward; // The sequential rewards which referrer will get 
+        uint16[] referrerReward; // The sequential rewards which referrer will get 
         uint8[] refereeRewardPerc; // The sequential rewards which referee will get 
         mapping(address=>referral) referrals;
     }
     
-    mapping(uint=>scheme) schemes;
+    mapping(uint=>scheme) public schemes;
+    
+    /**
+ * A referral is an event of a user actually referring other user from front end
+ */
+       
+    struct referral {
+        address referrer;
+        address referee;
+        uint8 noOfRedemptions; //We should be able to know how many redemptions have beeen made against this referral. Basis this number we will define the rewards given to the referrer and referee
+        uint schemeId;
+    }
+    
+    mapping(bytes32=>referral) referrals;
+    mapping(address=>uint)=> referrerRewardPointsEarned;
 }
