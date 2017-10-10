@@ -20,7 +20,7 @@ contract Plentix is dataEntities  {
     mapping(address=>Admin) admins;
     uint8 maxRedemptionsAllowedPerReferral = 3;
     
-    //This program, called constructor, runs "ONLY" the first time the contract is deployed.
+    //Constructor, runs "ONLY" the first time the contract is deployed.
     function Plentix(){
         // Admin admin;
         // admin.name = "Super Admin";
