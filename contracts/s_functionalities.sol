@@ -30,24 +30,27 @@ contract Plentix is dataEntities  {
     }
     
     //For users to create Referrals
-    function createReferral(uint _schemeId, address _referee) returns(referralId){
-        bytes32 referralId = sha3(_schemeId,_referee,now);
-        referrals[referralId].referrer = msg.sender;
-        referrals[referralId].referee = _referee;
-        referrals[referralId].noOfRedemptions = 0;
-        referrals[referralId].schemeId=_schemeId;
-        return referralId;
+    function createReferral(uint _schemeId, address _referee) returns(bytes32 referralId){
+        referralId = keccak256(_schemeId,_referee,now); //Creating a unique id for this referral
+        referrals[referralId].referrer = msg.sender; //assigning the referral
+        referrals[referralId].referee = _referee; //assigning the referee
+        referrals[referralId].noOfRedemptions = 0; // Initiatializing the num of redemptions
+        referrals[referralId].schemeId=_schemeId; //assigning the schemeId to referral
+        return referralId; //Returning the referralId to the dapp
         //CREATE AN EVENT HERE - TODO
     }
     
     //For Referees to redeem their rewards
-    function redeemReferral(bytes32 referralId) {
-        uint8 noOfRedemptionsTillNow = referrals[referralId].noOfRedemptions;
-        scheme schemeStruct = schemes[referrals[referralId].schemeId];
-        address referrerAddress = referrals[referralId].referrer;
-        require(referrals[noOfRedemptionsTillNow < schemeStruct.redemptionsAllowed)
-        referrals[referralId].noOfRedemptions += 1;
-        referrerRewardPointsEarned[referrerAddress] += schemeStruct.referrerReward[noOfRedemptionsTillNow];//ATTENTION , USE SafeMath when dealing with tokens 
+    function redeemReferral(bytes32 _referralId) returns(uint8) { //recieve referralId from redeemer
+        referral memory ref;
+        uint8 noOfRedemptionsTillNow = ref.noOfRedemptions;
+        scheme schemeStruct = schemes[ref.schemeId];
+        address referrerAddress = ref.referrer;
+        address refereeAddress = ref.referee;
+        require(noOfRedemptionsTillNow < schemeStruct.redemptionsAllowed //Check whether the redemptions are still allowed/available
+            && refereeAddress == msg.sender); //Check whether the redeemer is the actual referee
+        ref.noOfRedemptions += 1; //update the number of redemptions
+        referrerRewardPointsEarned[referrerAddress] += schemeStruct.referrerReward[noOfRedemptionsTillNow];//Update the referrers reward points . ATTENTION , USE SafeMath when dealing with tokens 
         return schemeStruct.refereeRewardPerc[noOfRedemptionsTillNow];
     }
 
@@ -61,20 +64,20 @@ contract Plentix is dataEntities  {
     
     //For admin to create new schemes
     function createScheme( uint _schemeId,address _business,uint8 _redemptionsAllowed,uint16 _totalReferralsAllowed, string _domain,uint16[] _referrerRewards, uint8[] _refereeRewardPerc) returns(uint16){
-        require (msg.sender == owner && _redemptionsAllowed<=maxRedemptionsAllowedPerReferral);
-        require (_redemptionsAllowed == _referrerRewards.length && _redemptionsAllowed == _refereeRewardPerc.length );
-        scheme s = schemes[_schemeId];
+        require (msg.sender == owner && _redemptionsAllowed<=maxRedemptionsAllowedPerReferral);//check whether the creater is admin/owner and check the configuration
+        require (_redemptionsAllowed == _referrerRewards.length && _redemptionsAllowed == _refereeRewardPerc.length ); //Check whether arrays have equalent values for rewards as per no. of redemptions available
+        scheme s = schemes[_schemeId]; //fetch scheme
         s.business = _business;
         s.redemptionsAllowed = _redemptionsAllowed;
         s.totalReferralsAllowed = _totalReferralsAllowed;
         s.domain = _domain;
-        uint16[] memory temp1 = new uint16[] (_redemptionsAllowed);
+        uint16[] memory temp1 = new uint16[] (_redemptionsAllowed); //create temp arrays to assign to scheme struct
         uint8[] memory temp2 = new uint8[] (_redemptionsAllowed);
-        for( uint8 i=0;i<=_redemptionsAllowed-1;i++ ){
+        for( uint8 i=0;i<=_redemptionsAllowed-1;i++ ){ //fetch values from the input arrays
             temp1[i]= _referrerRewards[i];
             temp2[i]= _refereeRewardPerc[i];
         }
-        schemes[_schemeId].referrerReward = temp1;
+        schemes[_schemeId].referrerReward = temp1; //assign the temp arrays to the actual scheme struct object
         schemes[_schemeId].refereeRewardPerc = temp2;
         return(schemes[_schemeId].referrerReward[0]); //REMOVE THIS RETURN TODO
     }
@@ -106,6 +109,9 @@ contract Plentix is dataEntities  {
     // }
 }
 
+
+
+// Test code for checking various variable use strategies. IGNORE IT
 contract test is dataEntities {
     mapping(uint=>scheme) public schemes;
     address owner;
