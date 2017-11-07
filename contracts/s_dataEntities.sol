@@ -2,7 +2,7 @@ pragma solidity ^0.4.17;
 
 /** 
  * @Title DataEntities
- * @Author Sandeep Nailwal
+ * @Author Steve French
  * @Dev DataEntities will have all the actors, data elements in the system and related operations that can be performed on them. 
  */
 
