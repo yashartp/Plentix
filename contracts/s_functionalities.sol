@@ -4,7 +4,7 @@ import './S_dataEntities.sol';
 
 /** 
  * @Title DataEntities
- * @Author Sandeep Nailwal
+ * @Author Steve French
  * @Dev Functionalities will have all the events in the system and related operations that can be performed on them. 
  */
 
